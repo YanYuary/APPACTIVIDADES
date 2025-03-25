@@ -141,23 +141,21 @@ tab0, tab1, tab2 = st.tabs(["🌐 Visión General", "📋 Actualizar Progreso", 
 # Pestaña 0 - Visión General
 # ============================
 with tab0:
-    # Título con emoticones
-    st.markdown('<div class="title"><h1>👽 Progreso Global 👽</h1></div>', unsafe_allow_html=True)
-    
+    st.markdown('<div class="title"><h1> 👽 Progreso Global 👽 </h1></div>', unsafe_allow_html=True)
     df = st.session_state.df.copy()
     if df.empty:
         st.write("No hay actividades registradas.")
     else:
+        # Métrica: Promedio global de progreso
         sem_cols = [col for col in df.columns if col.startswith("Sem")]
         if sem_cols:
             # Limpiar datos numéricos
             df[sem_cols] = df[sem_cols].replace('', np.nan).apply(pd.to_numeric, errors='coerce')
             total = df[sem_cols].mean().mean()
-            
-            # Porcentaje centrado debajo del título
             st.markdown(f"""
-                <div style="text-align: center; font-size: 24px; margin-top: -20px; margin-bottom: 20px;">
-                    {total:.1f}%
+                <div class="metric-card">
+                    <h3>Avance Total</h3>
+                    <h1>{total:.1f}%</h1>
                 </div>
             """, unsafe_allow_html=True)
 
