@@ -155,9 +155,7 @@ with tab0:
             
             st.markdown(f"""
                 <div class="metric-card">
-                <div style="text-align: center; 
-                            background-color: #CCFFCC;
-                 ">
+                <div style="text-align: center">
                     <h1>{total:.1f}%</h1>
                 </div> 
                 </div>
