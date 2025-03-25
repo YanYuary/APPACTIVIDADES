@@ -81,9 +81,6 @@ if "df" not in st.session_state:
 # ============================
 # Estilos CSS
 # ============================
-
-
-#---------------------------------------- Se define el estilo del CSS -----------------------------------------------#
 st.markdown("""
     <style>
     .title {
@@ -114,9 +111,6 @@ st.markdown("""
 # ============================
 # Funciones Auxiliares
 # ============================
-
-
-#---------------------------------------- Se define ..... ----------------------------------------------#
 def apply_row_style(row):
     semanas = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4']
     try:
@@ -131,9 +125,6 @@ def apply_row_style(row):
 # ============================
 # Layout Principal
 # ============================
-
-
-#---------------------------------------- Se definem las pestañas de la APP -----------------------------------------------#
 tab0, tab1, tab2 = st.tabs(["🔭 Visión General", "📋 Actualizar Progreso", "🛰️ Evolución"])
 
 
@@ -141,18 +132,17 @@ tab0, tab1, tab2 = st.tabs(["🔭 Visión General", "📋 Actualizar Progreso", 
 # Pestaña 0 - Visión General
 # ============================
 with tab0:
-    st.markdown('<div class="title"><h1> 🛸 Progreso Global 🛸 </h1></div>', unsafe_allow_html=True)
+    # Actualizar data al cambiar de pestaña
+    st.session_state.df = load_data()
     df = st.session_state.df.copy()
+    st.markdown('<div class="title"><h1> 🛸 Progreso Global 🛸 </h1></div>', unsafe_allow_html=True)
     if df.empty:
         st.write("No hay actividades registradas.")
     else:
-        # Métrica: Promedio global de progreso
         sem_cols = [col for col in df.columns if col.startswith("Sem")]
         if sem_cols:
-            # Limpiar datos numéricos
             df[sem_cols] = df[sem_cols].replace('', np.nan).apply(pd.to_numeric, errors='coerce')
             total = df[sem_cols].mean().mean()
-          # Imprime el % de progreso con Color
             st.markdown(f"""
                 <div style="
                     background: #FFFFCC;
@@ -164,8 +154,6 @@ with tab0:
                 </div>
             """, unsafe_allow_html=True)
 
-
-        # Tabla estilizada con formato y limpieza de datos
         styled_df = df.style.format({
             "Fecha Inicio": lambda d: d.strftime("%d/%m/%Y") if pd.notnull(d) else "",
             "Fecha Fin": lambda d: d.strftime("%d/%m/%Y") if pd.notnull(d) else ""
@@ -173,7 +161,7 @@ with tab0:
             .apply(apply_row_style, axis=1)\
             .background_gradient(subset=sem_cols, cmap='YlGnBu', text_color_threshold=0.5, vmin=0, vmax=100)\
             .set_properties(**{
-                'background-color': '#FFFFEF',  # CAMBIO PRINCIPAL AQUÍ
+                'background-color': '#FFFFEF',
                 'color': '#2d3436',
                 'border': '1px solid #dfe6e9'
             })\
@@ -192,18 +180,12 @@ with tab0:
             .set_properties(subset=['Fecha Inicio', 'Fecha Fin'], **{
                 'font-weight': '600',
                 'color': '#d63031',
-                'background-color': '#ffcccc'  # Mantenemos el rojo para fechas
+                'background-color': '#ffcccc'
             })\
             .bar(subset=sem_cols, color='#00b894', vmin=0, vmax=100)\
             .format("{:.1f}%", subset=sem_cols)
-
         st.dataframe(styled_df, use_container_width=True, height=400)
 
-
-
-        
-
-        # Mapa de calor
         if sem_cols:
             heat_df = df.melt(id_vars="Actividad", value_vars=sem_cols, var_name="Semana", value_name="Progreso")
             heatmap = alt.Chart(heat_df).mark_rect().encode(
@@ -219,18 +201,20 @@ with tab0:
 # Pestaña 1 - Actualizar Progreso
 # ============================
 with tab1:
-    st.markdown('<div class="title"><h1> 🌌 Actualizar Progreso 🌌 </h1></div>', unsafe_allow_html=True)
+    # Refrescar data al cambiar de pestaña
+    st.session_state.df = load_data()
     df = st.session_state.df.copy()
+    st.markdown('<div class="title"><h1> 🌌 Actualizar Progreso 🌌 </h1></div>', unsafe_allow_html=True)
 
     sem_cols = [col for col in df.columns if col.startswith("Sem")]
     semana = st.selectbox("Seleccionar Semana", sem_cols, key="semana_selector")
 
-    # NUEVO: Filtro para seleccionar la actividad a actualizar
     if df.empty:
         st.write("No hay actividades registradas para actualizar.")
     else:
-        selected_activity = st.selectbox("Selecciona la actividad a actualizar", df["Actividad"].tolist(), key="update_activity_selector")
-        filtered_df = df[df["Actividad"] == selected_activity]
+        # Filtro único que se utilizará tanto para actualizar como para eliminar
+        fused_activity = st.selectbox("Selecciona la actividad", df["Actividad"].tolist(), key="fused_activity_selector")
+        filtered_df = df[df["Actividad"] == fused_activity]
 
         for idx, row in filtered_df.iterrows():
             with st.form(key=f"update_form_{idx}", clear_on_submit=False):
@@ -256,7 +240,6 @@ with tab1:
                         value=int(current_value) if current_value != "" else 0,
                         key=f"slider_{idx}_{semana}"
                     )
-                # Nuevo textbox para Comentarios, ubicado debajo de la fecha
                 new_comentario = st.text_input(
                     "Comentario",
                     value=row.get("Comentarios", ""),
@@ -264,7 +247,6 @@ with tab1:
                 )
                 submitted = st.form_submit_button("💾 Guardar Cambios")
                 if submitted:
-                    # Actualiza los valores en el DataFrame
                     df.at[idx, "Fecha Inicio"] = pd.to_datetime(new_start)
                     df.at[idx, "Fecha Fin"] = pd.to_datetime(new_end)
                     df.at[idx, semana] = new_value
@@ -275,12 +257,12 @@ with tab1:
 
     st.markdown("---")
     st.markdown("### 🪐 Eliminar Actividad")
-    with st.form("delete_form"):
-        act_to_delete = st.selectbox("Selecciona la actividad a borrar", df["Actividad"].tolist(), key="delete_select")
-        delete_submitted = st.form_submit_button("🗑️ Borrar Actividad")
-        if delete_submitted:
-            delete_activity(act_to_delete)
-            st.success(f"Actividad '{act_to_delete}' eliminada.")
+    st.write(f"Actividad seleccionada: **{fused_activity}**")
+    confirm_delete = st.checkbox("¿Estás seguro de eliminar la actividad?")
+    if confirm_delete:
+        if st.button("🗑️ Borrar Actividad"):
+            delete_activity(fused_activity)
+            st.success(f"Actividad '{fused_activity}' eliminada.")
             st.session_state.df = load_data()
 
     st.markdown("---")
@@ -293,7 +275,6 @@ with tab1:
         new_sem4 = st.number_input("Sem 4", min_value=0, max_value=100, value=0)
         new_fecha_inicio = st.date_input("Fecha Inicio", value=date.today())
         new_fecha_fin = st.date_input("Fecha Fin", value=date.today())
-        # Nuevo campo para Comentarios en actividad nueva
         new_comentario = st.text_input("Comentario", value="")
         add_submitted = st.form_submit_button("➕ Añadir Actividad")
         if add_submitted:
@@ -319,8 +300,10 @@ with tab1:
 # Pestaña 3 - Evolución Histórica
 # ============================
 with tab2:
-    st.markdown('<div class="title"><h1> 👾 Evolución Histórica 👾 </h1></div>', unsafe_allow_html=True)
+    # Actualizar data al cambiar de pestaña
+    st.session_state.df = load_data()
     df = st.session_state.df.copy()
+    st.markdown('<div class="title"><h1> 👾 Evolución Histórica 👾 </h1></div>', unsafe_allow_html=True)
     sem_cols = [col for col in df.columns if col.startswith("Sem")]
     if not df.empty and sem_cols:
         melt_df = df.melt(
