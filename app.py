@@ -155,9 +155,9 @@ with tab0:
                         
             st.markdown(f"""
                 <div style="
-                    background: white;
+                    background: #FFFFCC;
                     text-align: center;
-                    padding: 1px;
+                    padding: 0px;
                     border-radius: 10px;
                 ">
                     <h1 style="color: #000000 !important; margin: 0;">{total:.1f}%</h1>
