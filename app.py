@@ -12,20 +12,20 @@ import matplotlib
 # ============================
 EXPECTED_HEADERS = ["Actividad", "Sem 1", "Sem 2", "Sem 3", "Sem 4", "Fecha Inicio", "Fecha Fin", "Comentarios"]  # se agregó la columna "Comentarios"
 
+
 # ============================
-# Funciones para Google Sheets
+# Funciones para Google Sheets                    #AQUI ESTA LA MODIFICACION REALIZADA 
 # ============================
 
-#------------------------------------ Caching de la conexión a Google Sheets -----------------------------------------------#
-@st.cache_resource
-def get_gc():
-    return gspread.service_account_from_dict(st.secrets["gcp_service_account"])
 
+#------------------------------------ Cargar credenciales desde el archivo TOML -----------------------------------------------#
 def connect_gsheets():
-    gc = get_gc()
+    # Modificado: Usar st.secrets en lugar de cargar archivo TOML
+    gc = gspread.service_account_from_dict(st.secrets["gcp_service_account"])
     sh = gc.open("ACTIVIDADES_AVANCE")
     worksheet = sh.sheet1  # seleccionamos la hoja 1
     return worksheet
+
 
 #---------------------------------------- Cargar el Archivo de Google Sheets -----------------------------------------------#
 def load_data():
@@ -54,6 +54,7 @@ def update_sheet(df):
     # Se actualiza la hoja con encabezados y filas
     worksheet.update([df_copy.columns.values.tolist()] + df_copy.fillna("").values.tolist())
 
+
 def delete_activity(activity_name):
     worksheet = connect_gsheets()
     # Se obtiene toda la data usando los encabezados esperados
@@ -62,6 +63,8 @@ def delete_activity(activity_name):
         if row.get("Actividad") == activity_name:
             worksheet.delete_rows(i)
             break
+#----------------------------------------------------------------------------------------------------------------------------------------------------#
+
 
 # ============================
 # Configuración Inicial de la App
@@ -71,6 +74,7 @@ st.set_page_config(page_title="Avance de Actividades - YanYuary", layout="wide",
 # Carga inicial de datos
 if "df" not in st.session_state:
     st.session_state.df = load_data()
+
 
 # ============================
 # Estilos CSS
@@ -101,6 +105,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+
 # ============================
 # Funciones Auxiliares
 # ============================
@@ -114,10 +119,12 @@ def apply_row_style(row):
     color = f"linear-gradient(90deg, rgba(46,213,115,{avg/100 + 0.3}) 0%, rgba(255,71,87,{1 - avg/100 + 0.3}) 100%)"
     return [f'background: {color}; color: white;'] * len(row)
 
+
 # ============================
 # Layout Principal
 # ============================
 tab0, tab1, tab2 = st.tabs(["🔭 Visión General", "📋 Actualizar Progreso", "🛰️ Evolución"])
+
 
 # ============================
 # Pestaña 0 - Visión General
@@ -185,6 +192,7 @@ with tab0:
             ).properties(height=300)
             st.altair_chart(heatmap, use_container_width=True)
 
+
 # ============================
 # Pestaña 1 - Actualizar Progreso
 # ============================
@@ -240,7 +248,6 @@ with tab1:
                     update_sheet(df)
                     st.success(f"Cambios guardados para '{row['Actividad']}'.")
                     st.session_state.df = load_data()
-                    st.experimental_rerun()
 
     st.markdown("---")
     st.markdown("### 🪐 Eliminar Actividad")
@@ -251,7 +258,6 @@ with tab1:
             delete_activity(fused_activity)
             st.success(f"Actividad '{fused_activity}' eliminada.")
             st.session_state.df = load_data()
-            st.experimental_rerun()
 
     st.markdown("---")
     st.markdown("### ⚛️ Añadir Nueva Actividad")
@@ -282,7 +288,7 @@ with tab1:
                 worksheet.append_row(new_row)
                 st.success("Actividad añadida.")
                 st.session_state.df = load_data()
-                st.experimental_rerun()
+
 
 # ============================
 # Pestaña 3 - Evolución Histórica
