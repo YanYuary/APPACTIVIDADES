@@ -132,7 +132,7 @@ def apply_row_style(row):
 # Layout Principal
 # ============================
 
-
+st.markdown('<div class="title"><h1> 👽 Progreso Global 👽 </h1></div>', unsafe_allow_html=True)
 #---------------------------------------- Se definem las pestañas de la APP -----------------------------------------------#
 tab0, tab1, tab2 = st.tabs(["🌐 Visión General", "📋 Actualizar Progreso", "📊 Evolución"])
 
@@ -141,7 +141,7 @@ tab0, tab1, tab2 = st.tabs(["🌐 Visión General", "📋 Actualizar Progreso", 
 # Pestaña 0 - Visión General
 # ============================
 with tab0:
-    st.markdown('<div class="title"><h1> 👽 Progreso Global 👽 </h1></div>', unsafe_allow_html=True)
+
     df = st.session_state.df.copy()
     if df.empty:
         st.write("No hay actividades registradas.")
@@ -158,6 +158,7 @@ with tab0:
                     <h1>{total:.1f}%</h1>
                 </div>
             """, unsafe_allow_html=True)
+
 
         # Tabla estilizada con formato y limpieza de datos
         styled_df = df.style.format({
