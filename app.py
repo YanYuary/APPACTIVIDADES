@@ -152,17 +152,17 @@ with tab0:
             # Limpiar datos numéricos
             df[sem_cols] = df[sem_cols].replace('', np.nan).apply(pd.to_numeric, errors='coerce')
             total = df[sem_cols].mean().mean()
-            
+                        
             st.markdown(f"""
-                <div class="metric-card" style="
-                    background-color: #FFFFFF;
-                    color: #000000;
-                    text-align: center; 
-                    padding: 10px 20px;
+                <div style="
+                    background: white;
+                    text-align: center;
+                    padding: 15px;
                     border-radius: 10px;
                     margin: 0 auto;
+                    border: 1px solid #e0e0e0;
                 ">
-                    <h1 style="margin: 0; color: #000000;">{total:.1f}%</h1>
+                    <h1 style="color: #000000 !important; margin: 0;">{total:.1f}%</h1>
                 </div>
             """, unsafe_allow_html=True)
 
