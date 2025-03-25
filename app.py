@@ -173,14 +173,14 @@ with tab0:
             .apply(apply_row_style, axis=1)\
             .background_gradient(subset=sem_cols, cmap='YlGnBu', text_color_threshold=0.5, vmin=0, vmax=100)\
             .set_properties(**{
-                'background-color': '#f8f9fa',
+                'background-color': '#FFFFEF',  # CAMBIO PRINCIPAL AQUÍ
                 'color': '#2d3436',
                 'border': '1px solid #dfe6e9'
             })\
             .set_table_styles([{
                 'selector': 'th',
                 'props': [
-                    ('background-color', '#FFFFCC'),
+                    ('background-color', '#0984e3'),
                     ('color', 'white'),
                     ('font-family', 'Arial'),
                     ('border', '1px solid #74b9ff')
@@ -192,12 +192,13 @@ with tab0:
             .set_properties(subset=['Fecha Inicio', 'Fecha Fin'], **{
                 'font-weight': '600',
                 'color': '#d63031',
-                'background-color': '#ffcccc'
+                'background-color': '#ffcccc'  # Mantenemos el rojo para fechas
             })\
             .bar(subset=sem_cols, color='#00b894', vmin=0, vmax=100)\
-            .format("{:.1f}%", subset=sem_cols)  # Formato porcentual
+            .format("{:.1f}%", subset=sem_cols)
 
         st.dataframe(styled_df, use_container_width=True, height=400)
+
 
 
         
