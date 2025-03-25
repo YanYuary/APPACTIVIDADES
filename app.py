@@ -154,15 +154,11 @@ with tab0:
             total = df[sem_cols].mean().mean()
             
             st.markdown(f"""
-                <div style="
-                    text-align: center; 
-                    width: fit-content; 
-                    padding: 10px 20px; 
-                    background-color: #f0f2f6; 
-                    border-radius: 10px; 
-                    margin: 0 auto;
-                ">
-                    <h1 style="margin: 0;">{total:.1f}%</h1>
+                <div class="metric-card">
+                <div style="text-align: center; 
+                 ">
+                    <h1>{total:.1f}%</h1>
+                </div> 
                 </div>
             """, unsafe_allow_html=True)
 
