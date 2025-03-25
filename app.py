@@ -152,7 +152,7 @@ with tab0:
             # Limpiar datos numéricos
             df[sem_cols] = df[sem_cols].replace('', np.nan).apply(pd.to_numeric, errors='coerce')
             total = df[sem_cols].mean().mean()
-                        
+          # Imprime el % de progreso con Color
             st.markdown(f"""
                 <div style="
                     background: #FFFFCC;
@@ -181,7 +181,7 @@ with tab0:
                 'selector': 'th',
                 'props': [
                     ('background-color', '#0984e3'),
-                    ('color', 'white'),
+                    ('color', '#FFFFCC'),
                     ('font-family', 'Arial'),
                     ('border', '1px solid #74b9ff')
                 ]
@@ -198,6 +198,9 @@ with tab0:
             .format("{:.1f}%", subset=sem_cols)  # Formato porcentual
 
         st.dataframe(styled_df, use_container_width=True, height=400)
+
+
+        
 
         # Mapa de calor
         if sem_cols:
