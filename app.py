@@ -5,28 +5,26 @@ from datetime import date, datetime
 #import toml quitamos para SCC
 import gspread
 import numpy as np
-
+import matplotlib
 
 # ============================
 # Configuración de encabezados esperados
 # ============================
-EXPECTED_HEADERS = ["Actividad", "Sem 1", "Sem 2", "Sem 3", "Sem 4", "Fecha Inicio", "Fecha Fin"]
-
+EXPECTED_HEADERS = ["Actividad", "Sem 1", "Sem 2", "Sem 3", "Sem 4", "Fecha Inicio", "Fecha Fin", "Comentarios"]  # se agregó la columna "Comentarios"
 
 
 # ============================
-# Funciones para Google Sheets
+# Funciones para Google Sheets                    #AQUI ESTA LA MODIFICACION REALIZADA 
 # ============================
 
 
 #------------------------------------ Cargar credenciales desde el archivo TOML -----------------------------------------------#
 def connect_gsheets():
     # Modificado: Usar st.secrets en lugar de cargar archivo TOML -------------------------------------------------------------# NOTA IMPORTANTE
-    gc = gspread.service_account_from_dict(st.secrets["gcp_service_account"])
+    gc = gspread.service_account_from_dict(st.secrets["gcp_service_account"])  ## Conexión directa via st.secrets MODIFICACION TOML
     sh = gc.open("ACTIVIDADES_AVANCE")
-    worksheet = sh.sheet1
+    worksheet = sh.sheet1  # seleccionamos la hoja 1
     return worksheet
-
 
 
 #---------------------------------------- Cargar el Archivo de Google Sheets -----------------------------------------------#
@@ -68,8 +66,6 @@ def delete_activity(activity_name):
 #----------------------------------------------------------------------------------------------------------------------------------------------------#
 
 
-
-
 # ============================
 # Configuración Inicial de la App
 # ============================
@@ -80,8 +76,6 @@ st.set_page_config(page_title="Avance de Actividades - YanYuary", layout="wide",
 #---------------------------------------- Se carga la data desde Google Sheets y se guarda en session_state -----------------------------------------------#
 if "df" not in st.session_state:
     st.session_state.df = load_data()
-
-
 
 
 # ============================
@@ -117,14 +111,12 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
-
-
 # ============================
 # Funciones Auxiliares
 # ============================
 
 
-#---------------------------------------- Se define ..... completar IA-----------------------------------------------#
+#---------------------------------------- Se define ..... ----------------------------------------------#
 def apply_row_style(row):
     semanas = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4']
     try:
@@ -136,7 +128,6 @@ def apply_row_style(row):
     return [f'background: {color}; color: white;'] * len(row)
 
 
-
 # ============================
 # Layout Principal
 # ============================
@@ -146,13 +137,11 @@ def apply_row_style(row):
 tab0, tab1, tab2 = st.tabs(["🌐 Visión General", "📋 Actualizar Progreso", "📊 Evolución"])
 
 
-
 # ============================
-# Pestaña 1
+# Pestaña 0 - Visión General
 # ============================
-
 with tab0:
-    st.markdown('<div class="title"><h1>Progreso Global 🚀</h1></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title"><h1> 👽 Progreso Global 👽 </h1></div>', unsafe_allow_html=True)
     df = st.session_state.df.copy()
     if df.empty:
         st.write("No hay actividades registradas.")
@@ -162,7 +151,6 @@ with tab0:
         if sem_cols:
             # Limpiar datos numéricos
             df[sem_cols] = df[sem_cols].replace('', np.nan).apply(pd.to_numeric, errors='coerce')
-            
             total = df[sem_cols].mean().mean()
             st.markdown(f"""
                 <div class="metric-card">
@@ -205,7 +193,6 @@ with tab0:
 
         st.dataframe(styled_df, use_container_width=True, height=400)
 
-
         # Mapa de calor
         if sem_cols:
             heat_df = df.melt(id_vars="Actividad", value_vars=sem_cols, var_name="Semana", value_name="Progreso")
@@ -218,13 +205,9 @@ with tab0:
             st.altair_chart(heatmap, use_container_width=True)
 
 
-
-
 # ============================
-# Pestaña 2
+# Pestaña 1 - Actualizar Progreso
 # ============================
-
-
 with tab1:
     st.markdown('<div class="title"><h2>Actualizar Progreso</h2></div>', unsafe_allow_html=True)
     df = st.session_state.df.copy()
@@ -232,39 +215,50 @@ with tab1:
     sem_cols = [col for col in df.columns if col.startswith("Sem")]
     semana = st.selectbox("Seleccionar Semana", sem_cols, key="semana_selector")
 
-    with st.form("update_form", clear_on_submit=False):
+    # Se crean formularios individuales por cada actividad
+    if df.empty:
+        st.write("No hay actividades registradas para actualizar.")
+    else:
         for idx, row in df.iterrows():
-            st.subheader(row["Actividad"])
-            cols = st.columns([2, 1, 1, 3])
-            with cols[0]:
-                new_start = st.date_input(
-                    "Fecha Inicio",
-                    value=row["Fecha Inicio"].date() if pd.notnull(row["Fecha Inicio"]) else date.today(),
-                    key=f"start_{idx}_{semana}"
+            with st.form(key=f"update_form_{idx}", clear_on_submit=False):
+                st.subheader(row["Actividad"])
+                cols = st.columns([2, 1, 1, 3])
+                with cols[0]:
+                    new_start = st.date_input(
+                        "Fecha Inicio",
+                        value=row["Fecha Inicio"].date() if pd.notnull(row["Fecha Inicio"]) else date.today(),
+                        key=f"start_{idx}_{semana}"
+                    )
+                with cols[1]:
+                    new_end = st.date_input(
+                        "Fecha Fin",
+                        value=row["Fecha Fin"].date() if pd.notnull(row["Fecha Fin"]) else date.today(),
+                        key=f"end_{idx}_{semana}"
+                    )
+                with cols[3]:
+                    current_value = row.get(semana, 0)
+                    new_value = st.slider(
+                        "Progreso",
+                        0, 100,
+                        value=int(current_value) if current_value != "" else 0,
+                        key=f"slider_{idx}_{semana}"
+                    )
+                # Nuevo textbox para Comentarios, ubicado debajo de la fecha
+                new_comentario = st.text_input(
+                    "Comentario",
+                    value=row.get("Comentarios", ""),
+                    key=f"comentario_{idx}"
                 )
-            with cols[1]:
-                new_end = st.date_input(
-                    "Fecha Fin",
-                    value=row["Fecha Fin"].date() if pd.notnull(row["Fecha Fin"]) else date.today(),
-                    key=f"end_{idx}_{semana}"
-                )
-            with cols[3]:
-                current_value = row.get(semana, 0)
-                new_value = st.slider(
-                    "Progreso",
-                    0, 100,
-                    value=int(current_value) if current_value != "" else 0,
-                    key=f"slider_{idx}_{semana}"
-                )
-                df.at[idx, semana] = new_value
-            df.at[idx, "Fecha Inicio"] = pd.to_datetime(new_start)
-            df.at[idx, "Fecha Fin"] = pd.to_datetime(new_end)
-            st.divider()
-        submitted = st.form_submit_button("💾 Guardar Cambios")
-        if submitted:
-            update_sheet(df)
-            st.success("Cambios guardados en Google Sheets.")
-            st.session_state.df = load_data()
+                submitted = st.form_submit_button("💾 Guardar Cambios")
+                if submitted:
+                    # Actualiza los valores en el DataFrame
+                    df.at[idx, "Fecha Inicio"] = pd.to_datetime(new_start)
+                    df.at[idx, "Fecha Fin"] = pd.to_datetime(new_end)
+                    df.at[idx, semana] = new_value
+                    df.at[idx, "Comentarios"] = new_comentario
+                    update_sheet(df)
+                    st.success(f"Cambios guardados para '{row['Actividad']}'.")
+                    st.session_state.df = load_data()
 
     st.markdown("---")
     st.markdown("### Eliminar Actividad")
@@ -286,6 +280,8 @@ with tab1:
         new_sem4 = st.number_input("Sem 4", min_value=0, max_value=100, value=0)
         new_fecha_inicio = st.date_input("Fecha Inicio", value=date.today())
         new_fecha_fin = st.date_input("Fecha Fin", value=date.today())
+        # Nuevo campo para Comentarios en actividad nueva
+        new_comentario = st.text_input("Comentario", value="")
         add_submitted = st.form_submit_button("➕ Añadir Actividad")
         if add_submitted:
             if nueva_actividad.strip() == "":
@@ -297,7 +293,8 @@ with tab1:
                     nueva_actividad,
                     new_sem1, new_sem2, new_sem3, new_sem4,
                     fecha_inicio_str,
-                    fecha_fin_str
+                    fecha_fin_str,
+                    new_comentario
                 ]
                 worksheet = connect_gsheets()
                 worksheet.append_row(new_row)
@@ -305,14 +302,9 @@ with tab1:
                 st.session_state.df = load_data()
 
 
-
-
-
 # ============================
-# Pestaña 3
+# Pestaña 3 - Evolución Histórica
 # ============================
-
-
 with tab2:
     st.markdown('<div class="title"><h2>Evolución Histórica</h2></div>', unsafe_allow_html=True)
     df = st.session_state.df.copy()
@@ -333,4 +325,3 @@ with tab2:
         st.altair_chart(line_chart, use_container_width=True)
     else:
         st.write("No hay datos para mostrar la evolución.")
-#V.1
