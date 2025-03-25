@@ -157,6 +157,7 @@ with tab0:
                 <div class="metric-card">
                 <div style="text-align: center; 
                             margin: 0 auto;
+                            padding: 5px 10px;
                  ">
                     <h1>{total:.1f}%</h1>
                 </div> 
