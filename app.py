@@ -181,7 +181,7 @@ with tab0:
                 'selector': 'th',
                 'props': [
                     ('background-color', '#0984e3'),
-                    ('color', 'white'),
+                    ('color', '#FFA7A7'),
                     ('font-family', 'Arial'),
                     ('border', '1px solid #74b9ff')
                 ]
