@@ -180,8 +180,8 @@ with tab0:
             .set_table_styles([{
                 'selector': 'th',
                 'props': [
-                    ('background-color', '#0984e3'),
-                    ('color', '#FFFFCC'),
+                    ('background-color', '#FFFFCC'),
+                    ('color', 'white'),
                     ('font-family', 'Arial'),
                     ('border', '1px solid #74b9ff')
                 ]
