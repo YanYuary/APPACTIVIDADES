@@ -20,8 +20,8 @@ EXPECTED_HEADERS = ["Actividad", "Sem 1", "Sem 2", "Sem 3", "Sem 4", "Fecha Inic
 
 #------------------------------------ Cargar credenciales desde el archivo TOML -----------------------------------------------#
 def connect_gsheets():
-    # Modificado: Usar st.secrets en lugar de cargar archivo TOML -------------------------------------------------------------# NOTA IMPORTANTE
-    gc = gspread.service_account_from_dict(st.secrets["gcp_service_account"])  ## Conexión directa via st.secrets MODIFICACION TOML
+    # Modificado: Usar st.secrets en lugar de cargar archivo TOML
+    gc = gspread.service_account_from_dict(st.secrets["gcp_service_account"])
     sh = gc.open("ACTIVIDADES_AVANCE")
     worksheet = sh.sheet1  # seleccionamos la hoja 1
     return worksheet
@@ -69,11 +69,9 @@ def delete_activity(activity_name):
 # ============================
 # Configuración Inicial de la App
 # ============================
-
-#---------------------------------------- Título de la App -----------------------------------------------#
 st.set_page_config(page_title="Avance de Actividades - YanYuary", layout="wide", initial_sidebar_state="expanded", page_icon="👽")
 
-#---------------------------------------- Se carga la data desde Google Sheets y se guarda en session_state -----------------------------------------------#
+# Carga inicial de datos
 if "df" not in st.session_state:
     st.session_state.df = load_data()
 
@@ -132,8 +130,6 @@ tab0, tab1, tab2 = st.tabs(["🔭 Visión General", "📋 Actualizar Progreso", 
 # Pestaña 0 - Visión General
 # ============================
 with tab0:
-    # Actualizar data al cambiar de pestaña
-    st.session_state.df = load_data()
     df = st.session_state.df.copy()
     st.markdown('<div class="title"><h1> 🛸 Progreso Global 🛸 </h1></div>', unsafe_allow_html=True)
     if df.empty:
@@ -201,8 +197,6 @@ with tab0:
 # Pestaña 1 - Actualizar Progreso
 # ============================
 with tab1:
-    # Refrescar data al cambiar de pestaña
-    st.session_state.df = load_data()
     df = st.session_state.df.copy()
     st.markdown('<div class="title"><h1> 🌌 Actualizar Progreso 🌌 </h1></div>', unsafe_allow_html=True)
 
@@ -300,8 +294,6 @@ with tab1:
 # Pestaña 3 - Evolución Histórica
 # ============================
 with tab2:
-    # Actualizar data al cambiar de pestaña
-    st.session_state.df = load_data()
     df = st.session_state.df.copy()
     st.markdown('<div class="title"><h1> 👾 Evolución Histórica 👾 </h1></div>', unsafe_allow_html=True)
     sem_cols = [col for col in df.columns if col.startswith("Sem")]
