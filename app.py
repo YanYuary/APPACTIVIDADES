@@ -159,8 +159,6 @@ with tab0:
                     text-align: center;
                     padding: 15px;
                     border-radius: 10px;
-                    margin: 0 auto;
-                    border: 1px solid #e0e0e0;
                 ">
                     <h1 style="color: #000000 !important; margin: 0;">{total:.1f}%</h1>
                 </div>
