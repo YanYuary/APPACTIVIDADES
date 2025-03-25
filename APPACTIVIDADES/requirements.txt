@@ -1,6 +1,0 @@
-streamlit
-pandas
-altair
-gspread
-numpy
-matplotlib
