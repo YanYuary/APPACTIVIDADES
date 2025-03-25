@@ -134,14 +134,14 @@ def apply_row_style(row):
 
 
 #---------------------------------------- Se definem las pestañas de la APP -----------------------------------------------#
-tab0, tab1, tab2 = st.tabs(["🌐 Visión General", "📋 Actualizar Progreso", "📊 Evolución"])
+tab0, tab1, tab2 = st.tabs(["🔭 Visión General", "📋 Actualizar Progreso", "🛰️ Evolución"])
 
 
 # ============================
 # Pestaña 0 - Visión General
 # ============================
 with tab0:
-    st.markdown('<div class="title"><h1> 👽 Progreso Global 👽 </h1></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title"><h1> 🛸 Progreso Global 🛸 </h1></div>', unsafe_allow_html=True)
     df = st.session_state.df.copy()
     if df.empty:
         st.write("No hay actividades registradas.")
@@ -152,9 +152,9 @@ with tab0:
             # Limpiar datos numéricos
             df[sem_cols] = df[sem_cols].replace('', np.nan).apply(pd.to_numeric, errors='coerce')
             total = df[sem_cols].mean().mean()
+            
             st.markdown(f"""
                 <div class="metric-card">
-                    <h3>Avance Total</h3>
                     <h1>{total:.1f}%</h1>
                 </div>
             """, unsafe_allow_html=True)
@@ -210,7 +210,7 @@ with tab0:
 # Pestaña 1 - Actualizar Progreso
 # ============================
 with tab1:
-    st.markdown('<div class="title"><h2>Actualizar Progreso</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title"><h1> 🌌 Actualizar Progreso 🌌 </h1></div>', unsafe_allow_html=True)
     df = st.session_state.df.copy()
 
     sem_cols = [col for col in df.columns if col.startswith("Sem")]
@@ -272,7 +272,7 @@ with tab1:
             st.session_state.df = load_data()
 
     st.markdown("---")
-    st.markdown("### Añadir Nueva Actividad")
+    st.markdown("### ⚛️ Añadir Nueva Actividad")
     with st.form("add_activity_form"):
         nueva_actividad = st.text_input("Nombre de la Actividad")
         new_sem1 = st.number_input("Sem 1", min_value=0, max_value=100, value=0)
@@ -307,7 +307,7 @@ with tab1:
 # Pestaña 3 - Evolución Histórica
 # ============================
 with tab2:
-    st.markdown('<div class="title"><h2>Evolución Histórica</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="title"><h1> 👾 Evolución Histórica 👾 </h1></div>', unsafe_allow_html=True)
     df = st.session_state.df.copy()
     sem_cols = [col for col in df.columns if col.startswith("Sem")]
     if not df.empty and sem_cols:
