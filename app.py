@@ -181,7 +181,7 @@ with tab0:
                 'selector': 'th',
                 'props': [
                     ('background-color', '#0984e3'),
-                    ('color', '#FFA7A7'),
+                    ('color', 'white'),
                     ('font-family', 'Arial'),
                     ('border', '1px solid #74b9ff')
                 ]
@@ -225,11 +225,14 @@ with tab1:
     sem_cols = [col for col in df.columns if col.startswith("Sem")]
     semana = st.selectbox("Seleccionar Semana", sem_cols, key="semana_selector")
 
-    # Se crean formularios individuales por cada actividad
+    # NUEVO: Filtro para seleccionar la actividad a actualizar
     if df.empty:
         st.write("No hay actividades registradas para actualizar.")
     else:
-        for idx, row in df.iterrows():
+        selected_activity = st.selectbox("Selecciona la actividad a actualizar", df["Actividad"].tolist(), key="update_activity_selector")
+        filtered_df = df[df["Actividad"] == selected_activity]
+
+        for idx, row in filtered_df.iterrows():
             with st.form(key=f"update_form_{idx}", clear_on_submit=False):
                 st.subheader(row["Actividad"])
                 cols = st.columns([2, 1, 1, 3])
@@ -271,7 +274,7 @@ with tab1:
                     st.session_state.df = load_data()
 
     st.markdown("---")
-    st.markdown("### Eliminar Actividad")
+    st.markdown("### 🪐 Eliminar Actividad")
     with st.form("delete_form"):
         act_to_delete = st.selectbox("Selecciona la actividad a borrar", df["Actividad"].tolist(), key="delete_select")
         delete_submitted = st.form_submit_button("🗑️ Borrar Actividad")
